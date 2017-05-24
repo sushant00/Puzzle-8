@@ -49,6 +49,8 @@ public class PuzzleBoardView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        Log.i("puzzleview","ondraw");
         if (puzzleBoard != null) {
             if (animation != null && animation.size() > 0) {
                 puzzleBoard = animation.remove(0);
@@ -68,9 +70,15 @@ public class PuzzleBoardView extends View {
     }
 
     public void shuffle() {
+        Log.i("puzzleview","shuffle called");
         if (animation == null && puzzleBoard != null) {
-            // Do something. Then:
-            puzzleBoard.reset();
+            Log.i("puzzleview","shuffle enter");
+            for(int i = 0;i<9;i++){
+                Log.i("puzzleview","shuffle ith "+i);
+                puzzleBoard = puzzleBoard.neighbours().get(random.nextInt(puzzleBoard.neighbours().size()));
+            }
+            //puzzleBoard.reset();
+            Log.i("puzzleview","invalidate");
             invalidate();
         }
     }

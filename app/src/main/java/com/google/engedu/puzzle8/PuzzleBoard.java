@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class PuzzleBoard {
@@ -35,6 +36,7 @@ public class PuzzleBoard {
 
     PuzzleBoard(Bitmap bitmap, int parentWidth) {
         int x_cord = 0, y_cord = 0;
+        bitmap = Bitmap.createScaledBitmap(bitmap,parentWidth, parentWidth,false);
         Log.i("puzzle board","cords"+parentWidth+"as"+bitmap.getWidth());
         int BitWidth = bitmap.getWidth()/NUM_TILES;
         Log.i("puzzle board","wid"+BitWidth);
@@ -59,7 +61,8 @@ public class PuzzleBoard {
             Log.i("puzzle board","tile added");
         }
         Log.i("puzzle board","nulltile");
-        tiles.add(new PuzzleTile(null,NUM_TILES*NUM_TILES));
+        Bitmap nullBit = Bitmap.createBitmap(BitWidth,BitHeight, Bitmap.Config.ARGB_8888);
+        tiles.add(new PuzzleTile(nullBit,NUM_TILES*NUM_TILES));
     }
 
     PuzzleBoard(PuzzleBoard otherBoard) {
@@ -78,6 +81,8 @@ public class PuzzleBoard {
     }
 
     public void draw(Canvas canvas) {
+
+        Log.i("puzzleboard","draw");
         if (tiles == null) {
             return;
         }
@@ -135,7 +140,27 @@ public class PuzzleBoard {
     }
 
     public ArrayList<PuzzleBoard> neighbours() {
-        return null;
+        ArrayList<PuzzleBoard> neighbour = new ArrayList<>();
+        int i;
+        for(i = 0;i<tiles.size();i++ ){
+            if(tiles.get(i).getNumber() == 9){
+                break;
+            }
+        }
+        Log.i("puzzle board","neighbour coords");
+        for(int[] j : NEIGHBOUR_COORDS){
+            int index = XYtoIndex(j[0],j[1]);
+            if(index <9 && index >= 0){
+                Log.i("puzzle board","neighbour add start");
+                PuzzleBoard addit = new PuzzleBoard(this);
+                Log.i("puzzle board","neighbour add swap");
+                Collections.swap(addit.tiles,i,index);
+                Log.i("puzzle board","neighbour add end");
+                neighbour.add(addit);
+            }
+        }
+        Log.i("puzzle board","neighbour returning");
+        return neighbour;
     }
 
     public int priority() {
