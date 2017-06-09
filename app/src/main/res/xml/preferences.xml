@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+    android:summary="game Settings"
+    android:title="Settings" >
+        <ListPreference
+            android:key="num_tiles"
+            android:title="Number of Tiles"
+            android:dialogTitle="Tiles per Row/Coloumn"
+            android:entries="@array/listOptions"
+            android:entryValues="@array/listValues"
+            android:defaultValue="@string/defaultNumTiles" />
+    </PreferenceCategory>
+</PreferenceScreen>

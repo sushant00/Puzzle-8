@@ -26,10 +26,8 @@ public class PuzzleTile {
     private int number;
 
     public PuzzleTile(Bitmap bitmap, int number){
-        Log.i("puzzle tile","here"+number);
         this.bitmap = bitmap;
         this.number = number;
-        Log.i("puzzle tile","exiting"+number);
     }
 
     public int getNumber() {

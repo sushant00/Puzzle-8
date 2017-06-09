@@ -25,7 +25,9 @@ import java.util.Collections;
 
 public class PuzzleBoard {
 
-    private static final int NUM_TILES = 3;
+    private static int NUM_TILES;
+    int steps;
+    PuzzleBoard previousBoard;
     private static final int[][] NEIGHBOUR_COORDS = {
             { -1, 0 },
             { 1, 0 },
@@ -34,38 +36,31 @@ public class PuzzleBoard {
     };
     private ArrayList<PuzzleTile> tiles;
 
-    PuzzleBoard(Bitmap bitmap, int parentWidth) {
+    PuzzleBoard(Bitmap bitmap, int parentWidth, int numTiles) {
+        this.NUM_TILES = numTiles;
         int x_cord = 0, y_cord = 0;
         bitmap = Bitmap.createScaledBitmap(bitmap,parentWidth, parentWidth,false);
-        Log.i("puzzle board","cords"+parentWidth+"as"+bitmap.getWidth());
         int BitWidth = bitmap.getWidth()/NUM_TILES;
-        Log.i("puzzle board","wid"+BitWidth);
         int BitHeight = bitmap.getHeight()/NUM_TILES;
-        Log.i("puzzle board","ht"+BitHeight);
         ArrayList<Bitmap> chunkedImages = new ArrayList<Bitmap>(NUM_TILES*NUM_TILES);
-        Log.i("puzzle board","chunk");
         for(int i=0; i<NUM_TILES; i++){
             x_cord = 0;
             for(int j=0; j<NUM_TILES; j++) {
-                Log.i("puzzle board", "addto" + x_cord +"y"+ y_cord+"as" + BitWidth);
                 chunkedImages.add(Bitmap.createBitmap(bitmap, x_cord, y_cord, BitWidth, BitHeight));
                 x_cord += BitWidth;
             }
             y_cord+=BitHeight;
         }
         tiles = new ArrayList<PuzzleTile>(NUM_TILES*NUM_TILES);
-        Log.i("puzzle board","tiling");
         for(int i=1; i<NUM_TILES*NUM_TILES; i++) {
-            Log.i("puzzle board","tiling"+i);
-            tiles.add(new PuzzleTile(chunkedImages.get(i-1),i));
-            Log.i("puzzle board","tile added");
+            tiles.add(new PuzzleTile(chunkedImages.get(i-1),i-1));
         }
-        Log.i("puzzle board","nulltile");
-        Bitmap nullBit = Bitmap.createBitmap(BitWidth,BitHeight, Bitmap.Config.ARGB_8888);
-        tiles.add(new PuzzleTile(nullBit,NUM_TILES*NUM_TILES));
+        tiles.add(null);
     }
 
     PuzzleBoard(PuzzleBoard otherBoard) {
+        steps = otherBoard.steps+1;
+        previousBoard = otherBoard;
         tiles = (ArrayList<PuzzleTile>) otherBoard.tiles.clone();
     }
 
@@ -81,8 +76,6 @@ public class PuzzleBoard {
     }
 
     public void draw(Canvas canvas) {
-
-        Log.i("puzzleboard","draw");
         if (tiles == null) {
             return;
         }
@@ -143,28 +136,32 @@ public class PuzzleBoard {
         ArrayList<PuzzleBoard> neighbour = new ArrayList<>();
         int i;
         for(i = 0;i<tiles.size();i++ ){
-            if(tiles.get(i).getNumber() == 9){
+            if(tiles.get(i)== null){
                 break;
             }
         }
-        Log.i("puzzle board","neighbour coords");
+        int nullX = i%NUM_TILES;
+        int nullY = i/NUM_TILES;
         for(int[] j : NEIGHBOUR_COORDS){
-            int index = XYtoIndex(j[0],j[1]);
-            if(index <9 && index >= 0){
-                Log.i("puzzle board","neighbour add start");
-                PuzzleBoard addit = new PuzzleBoard(this);
-                Log.i("puzzle board","neighbour add swap");
-                Collections.swap(addit.tiles,i,index);
-                Log.i("puzzle board","neighbour add end");
-                neighbour.add(addit);
+            int neighbourX = nullX + j[0];
+            int neighbourY = nullY + j[1];
+            if(neighbourX >= 0 && neighbourX < NUM_TILES && neighbourY >= 0 && neighbourY < NUM_TILES){
+                PuzzleBoard validNeighbour = new PuzzleBoard(this);
+                Collections.swap(validNeighbour.tiles,i,XYtoIndex(neighbourX,neighbourY));
+                neighbour.add(validNeighbour);
             }
         }
-        Log.i("puzzle board","neighbour returning");
         return neighbour;
     }
 
     public int priority() {
-        return 0;
+        int distance = 0;
+        for (int i = 0; i < NUM_TILES * NUM_TILES; i++) {
+            PuzzleTile tile = tiles.get(i);
+            if (tile != null) {
+                distance+= Math.abs((tile.getNumber() % NUM_TILES) - (i % NUM_TILES)) + Math.abs((tile.getNumber()/ NUM_TILES) - (i / NUM_TILES));
+            }
+        }
+        return distance+steps;
     }
-
 }
